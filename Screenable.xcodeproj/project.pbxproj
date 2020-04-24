@@ -13,6 +13,7 @@
 		8430CE6C2430B19000A5C9AB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8430CE6B2430B19000A5C9AB /* Assets.xcassets */; };
 		8430CE782430B20600A5C9AB /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8430CE772430B20600A5C9AB /* Main.storyboard */; };
 		8430CE7A2430B4E600A5C9AB /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = 8430CE792430B4E600A5C9AB /* fonts */; };
+		847C57052452AB6F00170DF1 /* Screenshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847C57042452AB6F00170DF1 /* Screenshot.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,6 +26,7 @@
 		8430CE712430B19000A5C9AB /* Screenable.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Screenable.entitlements; sourceTree = "<group>"; };
 		8430CE772430B20600A5C9AB /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		8430CE792430B4E600A5C9AB /* fonts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = fonts; sourceTree = "<group>"; };
+		847C57042452AB6F00170DF1 /* Screenshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Screenshot.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +60,7 @@
 			isa = PBXGroup;
 			children = (
 				8430CE652430B19000A5C9AB /* AppDelegate.swift */,
+				847C57042452AB6F00170DF1 /* Screenshot.swift */,
 				8430CE672430B19000A5C9AB /* ViewController.swift */,
 				8430CE772430B20600A5C9AB /* Main.storyboard */,
 				8430CE692430B19000A5C9AB /* Document.swift */,
@@ -141,6 +144,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8430CE682430B19000A5C9AB /* ViewController.swift in Sources */,
+				847C57052452AB6F00170DF1 /* Screenshot.swift in Sources */,
 				8430CE662430B19000A5C9AB /* AppDelegate.swift in Sources */,
 				8430CE6A2430B19000A5C9AB /* Document.swift in Sources */,
 			);

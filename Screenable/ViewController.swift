@@ -3,6 +3,15 @@ import Cocoa
 
 class ViewController: NSViewController {
     
+    
+    var screenshotImage: NSImage?
+    var document: Document {
+        let oughtToBeDocument = view.window?.windowController?.document as? Document
+        assert(oughtToBeDocument != nil, "Unable to find the document for this view controller.")   //crash if it is nil
+        return oughtToBeDocument!
+    }
+    
+    
     @IBOutlet var imageView: NSImageView!
     @IBOutlet var caption: NSTextView!
     @IBOutlet var fontName: NSPopUpButton!
@@ -16,42 +25,91 @@ class ViewController: NSViewController {
     @IBOutlet var dropShadowStrength: NSSegmentedControl!
     @IBOutlet var dropShadowTarget: NSSegmentedControl!
     
+    
     @objc func changeFontName(_ sender: NSMenuItem) {
+        document.screenshot.captionFontName = fontName.titleOfSelectedItem ?? ""
         generatePreview()
     }
+    
     
     @IBAction func changeFontSize(_ sender: NSMenuItem) {
         generatePreview()
+        document.screenshot.captionFontSize = fontSize.selectedTag()
     }
+    
     
     @IBAction func changeFontColor(_ sender: Any) {
         generatePreview()
+        document.screenshot.captionColor = fontColor.color
     }
     
+    
     @IBAction func changeBackgroundImage(_ sender: Any) {
+        
         generatePreview()
+        if backgroundImage.selectedTag() == 999 {
+            document.screenshot.backgroundImage = ""
+            
+        }
+        document.screenshot.backgroundImage = backgroundImage.titleOfSelectedItem ?? ""
+        
     }
+    
     
     @IBAction func changeBackgroundColorStart(_ sender: Any) {
         generatePreview()
+        document.screenshot.backgroundColorStart = backgroundColorStart.color
     }
+    
     
     @IBAction func changeBackgroundColorEnd(_ sender: Any) {
         generatePreview()
+        document.screenshot.backgroundColorEnd = backgroundColorEnd.color
     }
+    
     
     @IBAction func changeDropShadowStrength(_ sender: Any) {
         generatePreview()
+        document.screenshot.dropShadowStrength = dropShadowStrength.selectedSegment
     }
+    
     
     @IBAction func changeDropShadowTarget(_ sender: Any) {
         generatePreview()
+        document.screenshot.dropShadowTarget = dropShadowTarget.selectedSegment
+    }
+    
+    
+    @IBAction func export(_ sender: Any) {
+        
+        guard let image = imageView.image else { return }
+        guard let tiffData = image.tiffRepresentation else { return }
+        guard let imageRep = NSBitmapImageRep(data: tiffData) else { return }
+        guard let png = imageRep.representation(using: .png, properties: [:]) else { return }
+        
+        let panel = NSSavePanel()   //A panel that prompts the user for information about where to save a file.
+        panel.allowedFileTypes = ["jpg", "png"]
+        panel.begin { result in
+            if result == .OK {
+                guard let URL = panel.url else { return }
+                do {
+                    try png.write(to: URL)
+                } catch  {
+                    //CHANGES NEED TO BE MADE HERE
+                    print(error.localizedDescription)
+                }
+            }
+        }
+        
+        
     }
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        let recognizer = NSClickGestureRecognizer(target: self, action: #selector(importScreenshot))
+        imageView.addGestureRecognizer(recognizer)
         loadFonts()
         loadBackgroundImages()
         
@@ -59,7 +117,7 @@ class ViewController: NSViewController {
     
     override func viewWillAppear() {
         super.viewWillAppear()
-        
+        updateUI()
         generatePreview()
     }
     
@@ -85,8 +143,6 @@ class ViewController: NSViewController {
     }
     
     
-    
-    
     func loadBackgroundImages() {
         
         let allImages = ["Antique Wood", "Autumn Leaves", "Autumn Sunset", "Autumn by the Lake", "Beach and Palm Tree", "Blue Skies", "Bokeh (Blue)", "Bokeh (Golden)", "Bokeh (Green)", "Bokeh (Orange)", "Bokeh (Rainbow)", "Bokeh (White)", "Burning Fire", "Cherry Blossom", "Coffee Beans", "Cracked Earth", "Geometric Pattern 1", "Geometric Pattern 2", "Geometric Pattern 3", "Geometric Pattern 4", "Grass", "Halloween", "In the Forest", "Jute Pattern", "Polka Dots (Purple)", "Polka Dots (Teal)", "Red Bricks", "Red Hearts", "Red Rose", "Sandy Beach", "Sheet Music", "Snowy Mountain", "Spruce Tree Needles", "Summer Fruits", "Swimming Pool", "Tree Silhouette", "Tulip Field", "Vintage Floral", "Zebra Stripes"]
@@ -107,6 +163,8 @@ class ViewController: NSViewController {
             self.drawBackgroundImage(rect: rect)
             self.drawColorOverlay(rect: rect)
             let captionOffset = self.drawCaption(context: ctx, rect: rect)
+            self.drawDevice(context: ctx, rect: rect, captionOffset: captionOffset)
+            self.drawScreenshot(context: ctx, rect: rect, captionOffset: captionOffset)
             return true
         }
         imageView.image = image
@@ -191,7 +249,8 @@ class ViewController: NSViewController {
     
     func drawDevice(context: CGContext, rect: CGRect, captionOffset: CGFloat) {
         
-        guard let image = NSImage(named: "iPhone") else { return }
+        guard let image = NSImage(named: "iPhone") else { return }  //load the image
+        //in order to center the image in the X and Y axis
         let offsetX = (rect.size.width - image.size.width) / 2
         var offsetY = (rect.size.height - image.size.height) / 2
         offsetY -= captionOffset
@@ -213,7 +272,32 @@ class ViewController: NSViewController {
         
     }
     
-
+    @objc func importScreenshot() {
+        
+        let panel = NSOpenPanel()   //prompt user to select files to open
+        panel.allowedFileTypes = ["jpg", "png"]
+        panel.begin { [unowned self] result in
+            if result == .OK {
+                guard let imageURL = panel.url else { return }
+                self.screenshotImage = NSImage(contentsOf: imageURL)
+                self.generatePreview()
+            }
+        }
+        
+    }
+    
+    
+    func drawScreenshot(context: CGContext, rect: CGRect, captionOffset: CGFloat) {
+        
+        guard let screenshot = screenshotImage else { return }
+        screenshot.size = CGSize(width: 891, height: 1584)
+        let offsetY = 314 - captionOffset
+        screenshot.draw(at: CGPoint(x: 176, y: offsetY), from: .zero, operation: .sourceOver, fraction: 1)
+        
+    }
+    
+    
+    
     
 }
 
@@ -222,10 +306,27 @@ extension ViewController: NSTextViewDelegate {
     
     
     func textDidChange(_ notification: Notification) {
+        document.screenshot.caption = caption.string
         generatePreview()
     }
     
     
+    func updateUI() {
+        
+        caption.string = document.screenshot.caption
+        fontName.selectItem(withTitle: document.screenshot.captionFontName)
+        fontSize.selectItem(withTag: document.screenshot.captionFontSize)
+        fontColor.color = document.screenshot.captionColor
+        if !document.screenshot.backgroundImage.isEmpty {
+            backgroundImage.selectItem(withTitle: document.screenshot.backgroundImage)
+        }
+        backgroundColorStart.color = document.screenshot.backgroundColorStart
+        backgroundColorEnd.color = document.screenshot.backgroundColorEnd
+        dropShadowStrength.selectedSegment = document.screenshot.dropShadowStrength
+        dropShadowTarget.selectedSegment = document.screenshot.dropShadowTarget
+        
+    }
+        
 }
 
 
