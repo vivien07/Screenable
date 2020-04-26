@@ -56,14 +56,5 @@ class Screenshot: NSObject , NSCoding {
         
     }
     
-   
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  
 }

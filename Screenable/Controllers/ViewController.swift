@@ -27,56 +27,128 @@ class ViewController: NSViewController {
     
     
     @objc func changeFontName(_ sender: NSMenuItem) {
-        document.screenshot.captionFontName = fontName.titleOfSelectedItem ?? ""
+        setFontName(to: fontName.titleOfSelectedItem ?? "")
+    }
+    
+    @objc func setFontName(to name: String) {
+        
+        // register the undo point with the current font name
+        undoManager?.registerUndo(withTarget: self, selector: #selector(setFontName), object: document.screenshot.captionFontName)
+        // update the font name
+        document.screenshot.captionFontName = name
+        // update the UI to match
+        fontName.selectItem(withTitle: document.screenshot.captionFontName)
+        // ensure the preview is updated
         generatePreview()
+        
     }
     
     
     @IBAction func changeFontSize(_ sender: NSMenuItem) {
+        setFontSize(to: String(fontSize.selectedTag()))
+    }
+    
+    
+    @objc func setFontSize(to size: String) {
+        
+        undoManager?.registerUndo(withTarget: self, selector: #selector(setFontSize), object: String(document.screenshot.captionFontSize))
+        document.screenshot.captionFontSize = Int(size)!
+        fontSize.selectItem(withTag: document.screenshot.captionFontSize)
         generatePreview()
-        document.screenshot.captionFontSize = fontSize.selectedTag()
+        
     }
     
     
     @IBAction func changeFontColor(_ sender: Any) {
+        setFontColor(to: fontColor.color)
+    }
+    
+    
+    @objc func setFontColor(to color: NSColor) {
+        
+        undoManager?.registerUndo(withTarget: self, selector: #selector(setFontColor), object: document.screenshot.captionColor)
+        document.screenshot.captionColor = color
+        fontColor.color = color
         generatePreview()
-        document.screenshot.captionColor = fontColor.color
+        
     }
     
     
     @IBAction func changeBackgroundImage(_ sender: Any) {
         
-        generatePreview()
         if backgroundImage.selectedTag() == 999 {
-            document.screenshot.backgroundImage = ""
-            
+            setBackgroundImage(to: "")
+        } else {
+            setBackgroundImage(to: backgroundImage.titleOfSelectedItem ?? "")
         }
-        document.screenshot.backgroundImage = backgroundImage.titleOfSelectedItem ?? ""
         
     }
     
     
-    @IBAction func changeBackgroundColorStart(_ sender: Any) {
+    @objc func setBackgroundImage(to name: String) {
+        
+        undoManager?.registerUndo(withTarget: self, selector: #selector(setBackgroundImage), object: document.screenshot.backgroundImage)
+        document.screenshot.backgroundImage = name
+        backgroundImage.selectItem(withTitle: name)
         generatePreview()
-        document.screenshot.backgroundColorStart = backgroundColorStart.color
+    }
+    
+    
+    @IBAction func changeBackgroundColorStart(_ sender: Any) {
+        setBackgroundColorStart(to: backgroundColorStart.color)
+    }
+    
+    @objc func setBackgroundColorStart(to color: NSColor) {
+        
+        undoManager?.registerUndo(withTarget: self, selector: #selector(setBackgroundColorStart), object: document.screenshot.backgroundColorStart)
+        document.screenshot.backgroundColorStart = color
+        backgroundColorStart.color = color
+        generatePreview()
+        
     }
     
     
     @IBAction func changeBackgroundColorEnd(_ sender: Any) {
+        setBackgroundColorEnd(to: backgroundColorEnd.color)
+    }
+    
+    
+    @objc func setBackgroundColorEnd(to color: NSColor) {
+        
+        undoManager?.registerUndo(withTarget: self, selector: #selector(setBackgroundColorEnd), object: document.screenshot.backgroundColorEnd)
+        document.screenshot.backgroundColorEnd = color
+        backgroundColorEnd.color = color
         generatePreview()
-        document.screenshot.backgroundColorEnd = backgroundColorEnd.color
+        
     }
     
     
     @IBAction func changeDropShadowStrength(_ sender: Any) {
-        generatePreview()
-        document.screenshot.dropShadowStrength = dropShadowStrength.selectedSegment
+        setDropShadowStrength(to: String(dropShadowStrength.selectedSegment))
     }
     
     
-    @IBAction func changeDropShadowTarget(_ sender: Any) {
+    @objc func setDropShadowStrength(to strength: String) {
+        
+        undoManager?.registerUndo(withTarget: self, selector: #selector(setDropShadowStrength), object: String(document.screenshot.dropShadowStrength))
+        document.screenshot.dropShadowStrength = Int(strength)!
+        dropShadowStrength.selectedSegment = document.screenshot.dropShadowStrength
         generatePreview()
-        document.screenshot.dropShadowTarget = dropShadowTarget.selectedSegment
+        
+    }
+    
+    @IBAction func changeDropShadowTarget(_ sender: Any) {
+        setDropShadowTarget(to: String(dropShadowTarget.selectedSegment))
+    }
+    
+    
+    @objc func setDropShadowTarget(to target: String) {
+        
+        undoManager?.registerUndo(withTarget: self, selector: #selector(setDropShadowTarget), object: String(document.screenshot.dropShadowTarget))
+        document.screenshot.dropShadowTarget = Int(target)!
+        dropShadowTarget.selectedSegment = document.screenshot.dropShadowTarget
+        generatePreview()
+        
     }
     
     
@@ -100,7 +172,6 @@ class ViewController: NSViewController {
                 }
             }
         }
-        
         
     }
     
@@ -326,7 +397,7 @@ extension ViewController: NSTextViewDelegate {
         dropShadowTarget.selectedSegment = document.screenshot.dropShadowTarget
         
     }
-        
+    
 }
 
 
